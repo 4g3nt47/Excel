@@ -134,7 +134,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent){
   setWindowIcon(QIcon(":/images/icon.png"));
   setCentralWidget(excel);
   setAttribute(Qt::WA_DeleteOnClose);
-  resize(800, 550);
+  setMinimumSize(800, 550);
+
   excel->setupExcel();
   findDialog = nullptr;
   gotoDialog = nullptr;

@@ -26,8 +26,10 @@ class Excel : public QTableWidget{
 
   public:
 
-    static const int ROW_COUNT = 100;
+    // Max number of rows and columns. Can be safely high as empty cells are not actually instantiated.
+    static const int ROW_COUNT = 250;
     static const int COL_COUNT = 26;
+    // Custom magic bytes to identify valid Excel files.
     static const quint32 MAGIC_BYTES = 0xdeadbeef;
 
     Excel(QWidget *parent = nullptr);
