@@ -3,6 +3,7 @@ QT       += core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11
+DEFINES += QT_NO_DEBUG_OUTPUT
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -11,6 +12,7 @@ CONFIG += c++11
 INCLUDEPATH += $$PWD/include
 
 SOURCES += \
+    src/sortdialog.cpp \
     src/gotodialog.cpp \
     src/finddialog.cpp \
     src/cell.cpp \
@@ -23,7 +25,8 @@ HEADERS += \
     include/finddialog.h \
     include/cell.h \
     include/excel.h \
-    include/mainwindow.h
+    include/mainwindow.h \
+    include/sortdialog.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -34,5 +37,6 @@ RESOURCES += \
   resources.qrc
 
 FORMS += \
+  ui/sortdialog.ui \
   ui/gotodialog.ui \
   ui/finddialog.ui

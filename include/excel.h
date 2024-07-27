@@ -79,6 +79,8 @@ class Excel : public QTableWidget{
 
     void gotoCell(const QString &address);
 
+    void sortSelectedRows(Qt::SortOrder order);
+
     void about();
 
   public:

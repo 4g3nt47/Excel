@@ -34,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent){
   connect(saveAsAction, &QAction::triggered, excel, &Excel::saveFileAs);
 
   exitAction = new QAction(tr("&Exit"), this);
+  exitAction->setIcon(QIcon(":/images/exit.png"));
   exitAction->setShortcut(QKeySequence::Close);
   exitAction->setStatusTip(tr("Exit the application"));
   connect(exitAction, &QAction::triggered, this, &MainWindow::close);
@@ -74,6 +75,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent){
   gotoAction->setStatusTip(tr("Jump to a cell adrress"));
   connect(gotoAction, &QAction::triggered, this, &MainWindow::showGotoDialog);
 
+  sortAction = new QAction(tr("Sort"));
+  sortAction->setIcon(QIcon(":/images/sort.png"));
+  sortAction->setStatusTip(tr("Sort selected rows"));
+  connect(sortAction, &QAction::triggered, this, &MainWindow::showSortDialog);
+
   QAction *aboutAction = new QAction(tr("&About"));
   aboutAction->setStatusTip(tr("About Excel"));
   connect(aboutAction, &QAction::triggered, excel, &Excel::about);
@@ -96,6 +102,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent){
   editMenu->addAction(pasteAction);
   editMenu->addAction(deleteAction);
   editMenu->addSeparator();
+  editMenu->addAction(sortAction);
+  editMenu->addSeparator();
   editMenu->addAction(findAction);
   editMenu->addAction(gotoAction);
 
@@ -113,6 +121,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent){
   editToolBar->addAction(copyAction);
   editToolBar->addAction(pasteAction);
   editToolBar->addAction(deleteAction);
+  editToolBar->addSeparator();
+  editToolBar->addAction(sortAction);
   editToolBar->addSeparator();
   editToolBar->addAction(findAction);
   editToolBar->addAction(gotoAction);
@@ -139,6 +149,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent){
   excel->setupExcel();
   findDialog = nullptr;
   gotoDialog = nullptr;
+  sortDialog = nullptr;
 }
 
 MainWindow::~MainWindow(){
@@ -171,6 +182,15 @@ void MainWindow::showGotoDialog(){
     connect(gotoDialog, &GotoDialog::execGoto, excel, &Excel::gotoCell);
   }
   gotoDialog->exec();
+}
+
+void MainWindow::showSortDialog(){
+
+  if (!sortDialog){
+    sortDialog = new SortDialog(this);
+    connect(sortDialog, &SortDialog::execSort, excel, &Excel::sortSelectedRows);
+  }
+  sortDialog->exec();
 }
 
 void MainWindow::showStatusMessage(const QString &msg, int duration){

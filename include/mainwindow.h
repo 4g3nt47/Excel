@@ -21,7 +21,7 @@
 #include "excel.h"
 #include "finddialog.h"
 #include "gotodialog.h"
-
+#include "sortdialog.h"
 
 class MainWindow : public QMainWindow{
 
@@ -30,11 +30,12 @@ class MainWindow : public QMainWindow{
   private:
 
     QAction *openAction, *newAction, *saveAction, *saveAsAction, *exitAction;
-    QAction *copyAction, *pasteAction, *cutAction, *deleteAction, *findAction, *gotoAction;
+    QAction *copyAction, *pasteAction, *cutAction, *deleteAction, *findAction, *gotoAction, *sortAction;
     Excel *excel;
     QLabel *addressLabel, *valueLabel;
     FindDialog *findDialog;
     GotoDialog *gotoDialog;
+    SortDialog *sortDialog;
 
   public:
 
@@ -46,6 +47,7 @@ class MainWindow : public QMainWindow{
 
     void showFindDialog();
     void showGotoDialog();
+    void showSortDialog();
     void showStatusMessage(const QString &msg, int duration = 2000);
 
   protected:

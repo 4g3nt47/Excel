@@ -85,6 +85,7 @@ bool Excel::newFile(){
     return false;
   clearCells();
   setCurrentFile("");
+  setDocumentModified(false);
   return true;
 }
 
@@ -176,7 +177,6 @@ void Excel::deleteSelected(){
       }
     }
   }
-  somethingChanged();
 }
 
 void Excel::somethingChanged(){
@@ -209,6 +209,53 @@ void Excel::gotoCell(const QString &address){
     return;
   }
   setCurrentCell(row, col);
+}
+
+void Excel::sortSelectedRows(Qt::SortOrder order){
+
+  // 1. Validate selection.
+  QTableWidgetSelectionRange range = getSelectedRange();
+  if (range.rowCount() < 2){
+    emit showStatusMessage("You must select 2 or more rows before sorting!");
+    return;
+  }
+  QApplication::setOverrideCursor(Qt::WaitCursor);
+  // 2. Fetch all the cell data.
+  QList<QStringList> rows;
+  for (int i = range.topRow(); i <= range.bottomRow(); i++){
+    QStringList row;
+    for (int j = range.leftColumn(); j <= range.rightColumn(); j++){
+      Cell *cell = static_cast<Cell *>(item(i, j));
+      if (!cell){
+        cell = new Cell();
+        setItem(i, j, cell);
+      }
+      row.append(cell->text());
+    }
+    rows.append(row);
+  }
+  // 3. Sort them.
+  std::stable_sort(rows.begin(), rows.end(), [&](const QStringList &row1, const QStringList &row2){
+    int col_count = row1.count();
+    for (int i = 0; i < col_count; i++){
+      if (row1[i] != row2[i]){
+        if (order == Qt::AscendingOrder)
+          return row1[i] < row2[i];
+        else
+          return row2[i] < row1[i];
+      }
+    }
+    return false;
+  });
+  // 4. Load them back into the cells.
+  for (int i = range.topRow(); i <= range.bottomRow(); i++){
+    for (int j = range.leftColumn(); j <= range.rightColumn(); j++){
+      Cell *cell = static_cast<Cell *>(item(i, j));
+      cell->setText(rows[i - range.topRow()][j - range.leftColumn()]);
+    }
+  }
+  // 5. Done :)
+  QApplication::restoreOverrideCursor();
 }
 
 QTableWidgetSelectionRange Excel::getSelectedRange(){

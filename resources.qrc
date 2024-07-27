@@ -10,5 +10,7 @@
         <file>images/find.png</file>
         <file>images/goto.png</file>
         <file>images/icon.png</file>
+        <file>images/sort.png</file>
+        <file>images/exit.png</file>
     </qresource>
 </RCC>
