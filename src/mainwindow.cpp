@@ -2,7 +2,7 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent){
 
-  excel = new Excel(this);
+  excel = new Excel(250, 26, nullptr, nullptr, this);
   connect(excel, &Excel::updateWindowTitle, this, &MainWindow::setWindowTitle);
   connect(excel, &Excel::documentModified, this, &MainWindow::setWindowModified);
   connect(excel, &Excel::showStatusMessage, this, &MainWindow::showStatusMessage);

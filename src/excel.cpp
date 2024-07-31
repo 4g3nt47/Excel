@@ -1,7 +1,8 @@
 #include "excel.h"
 
-Excel::Excel(QWidget *parent) : QTableWidget(parent) {
-
+Excel::Excel(quint16 rowCount, quint16 colCount, QStringList *colLabels, QList<int> *readOnlyCols, QWidget *parent) : QTableWidget(parent), ROW_COUNT(rowCount), COL_COUNT(colCount){
+  this->colLabels = colLabels;
+  this->readOnlyCols = readOnlyCols;
 }
 
 Excel::~Excel(){
@@ -28,7 +29,7 @@ QString Excel::getBaseFilename(const QString &filename){
 bool Excel::canCloseDocument(){
 
   if (isWindowModified()){
-    int r = QMessageBox::warning(this, tr("Excel"), tr("You have some unsaved changes!\nWould you like to save?"), QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+    int r = QMessageBox::warning(this, tr("ResultSender"), tr("You have some unsaved changes!\nWould you like to save?"), QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
     if (r == QMessageBox::Yes)
       return saveFile();
     if (r == QMessageBox::No)
@@ -40,20 +41,24 @@ bool Excel::canCloseDocument(){
 
 void Excel::setCurrentFile(const QString &filename){
   currentFile = filename;
-  emit updateWindowTitle(tr("%1[*] - Excel").arg(filename.isEmpty() ? tr("Untitled") : getBaseFilename(filename)));
+  emit updateWindowTitle(tr("%1[*] - ResultSender").arg(filename.isEmpty() ? tr("Untitled") : getBaseFilename(filename)));
 }
 
 void Excel::clearCells(){
 
   setRowCount(0);
   setColumnCount(0);
-  setRowCount(Excel::ROW_COUNT);
-  setColumnCount(Excel::COL_COUNT);
-  for (int i = 0; i < Excel::COL_COUNT; i++){
+  setRowCount(ROW_COUNT);
+  setColumnCount(COL_COUNT);
+  for (int i = 0; i < COL_COUNT; i++){
     Cell *cell = new Cell();
-    cell->setText(QString(QChar('A' + i)));
+    if (colLabels)
+      cell->setText(colLabels->at(i));
+    else
+      cell->setText(QString(QChar('A' + i)));
     setHorizontalHeaderItem(i, cell);
   }
+  horizontalHeader()->setStretchLastSection(true);
   setCurrentCell(0, 0);
 }
 
@@ -97,6 +102,8 @@ bool Excel::saveFile(){
   if (filename.isEmpty())
     filename = QFileDialog::getSaveFileName(this, tr("Save Excel document"), ".", tr("Excel files (*.exl)"));
   if (!filename.isEmpty()){
+    if (!filename.endsWith(".exl"))
+      filename.append(".exl");
     setCurrentFile(filename);
     if (writeToDisk(filename)){
       setDocumentModified(false);
@@ -179,7 +186,15 @@ void Excel::deleteSelected(){
   }
 }
 
-void Excel::somethingChanged(){
+void Excel::somethingChanged(QTableWidgetItem *item){
+
+  if (item && readOnlyCols && readOnlyCols->contains(item->column())){
+    if (item->flags() & Qt::ItemIsEditable){
+      disconnect(this, &Excel::itemChanged, this, &Excel::somethingChanged); // Brief disconnect to avoid double-call
+      item->setFlags(item->flags() ^ Qt::ItemIsEditable);
+      connect(this, &Excel::itemChanged, this, &Excel::somethingChanged);
+    }
+  }
   setDocumentModified(true);
 }
 
@@ -188,12 +203,12 @@ void Excel::findCell(const QString &keyword, Qt::CaseSensitivity cs){
   for (int row = 0; row < ROW_COUNT; row++){
     for (int col = 0; col < COL_COUNT; col++){
       Cell *cell = static_cast<Cell *>(item(row, col));
-      if (cell){
-        if (cell->text().contains(keyword, cs)){
-          setCurrentCell(row, col);
-          emit showStatusMessage(tr("Keyword found!"));
-          return;
-        }
+      if (!cell)
+        continue;
+      if (cell->text().contains(keyword, cs)){
+        setCurrentCell(row, col);
+        emit showStatusMessage(tr("Keyword found!"));
+        return;
       }
     }
   }
@@ -270,7 +285,7 @@ bool Excel::writeToDisk(const QString &filename){
 
   QFile file(filename);
   if (!file.open(QIODevice::WriteOnly)){
-    QMessageBox::warning(this, tr("Excel"), tr("Error opening file!\nError: %1").arg(file.errorString()));
+    QMessageBox::warning(this, tr("ResultSender"), tr("Error opening file!\nError: %1").arg(file.errorString()));
     return false;
   }
   QDataStream ds(&file);
@@ -292,14 +307,14 @@ bool Excel::readFromDisk(const QString &filename){
 
   QFile file(filename);
   if (!file.open(QIODevice::ReadOnly)){
-    QMessageBox::warning(this, tr("Excel"), tr("Error opening file!\nError: %1").arg(file.errorString()));
+    QMessageBox::warning(this, tr("ResultSender"), tr("Error opening file!\nError: %1").arg(file.errorString()));
     return false;
   }
   QDataStream ds(&file);
   quint32 mgk;
   ds >> mgk;
   if (mgk != MAGIC_BYTES){
-    QMessageBox::warning(this, tr("Excel"), tr("The selecte file is not a valid Excel file!"));
+    QMessageBox::warning(this, tr("ResultSender"), tr("The selecte file is not a valid Excel file!"));
     file.close();
     return false;
   }
@@ -319,7 +334,7 @@ bool Excel::readFromDisk(const QString &filename){
 }
 
 void Excel::about(){
-  QMessageBox::about(this, tr("About Editor"), tr("<h2>Excel v1.0</h2>"
-                                                  "<p>This is a demo program showing how to use QTableWidget to work with grids of data</p>"
+  QMessageBox::about(this, tr("About ResultSender"), tr("<h2>ResultSender v1.0</h2>"
+                                                  "<p>ResultSender is a program for sending student results through email with customized, encrypted PDF attachment.</p>"
                                                   "<p>Copyright &copy; 2024 <a href='https://github.com/4g3nt47'>Umar Abdul</a></p>"));
 }

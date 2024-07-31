@@ -11,6 +11,7 @@
 
 #include <QApplication>
 #include <QTableWidget>
+#include <QHeaderView>
 #include <QFile>
 #include <QFileInfo>
 #include <QFileDialog>
@@ -18,6 +19,7 @@
 #include <QDataStream>
 #include <QMessageBox>
 #include <QClipboard>
+#include <QStringList>
 #include "cell.h"
 
 class Excel : public QTableWidget{
@@ -26,13 +28,7 @@ class Excel : public QTableWidget{
 
   public:
 
-    // Max number of rows and columns. Can be safely high as empty cells are not actually instantiated.
-    static const int ROW_COUNT = 250;
-    static const int COL_COUNT = 26;
-    // Custom magic bytes to identify valid Excel files.
-    static const quint32 MAGIC_BYTES = 0xdeadbeef;
-
-    Excel(QWidget *parent = nullptr);
+    Excel(quint16 rowCount, quint16 colCount, QStringList *colLabels = nullptr, QList<int> *readOnlyCols = nullptr, QWidget *parent = nullptr);
 
     ~Excel();
 
@@ -45,6 +41,12 @@ class Excel : public QTableWidget{
     bool canCloseDocument();
 
   private:
+
+    const quint32 MAGIC_BYTES = 0xdeadbeef; // Custom magic bytes to identify valid Excel files.
+    const quint16 ROW_COUNT;
+    const quint16 COL_COUNT;
+    QStringList *colLabels;
+    QList<int> *readOnlyCols;
 
     QString currentFile;
 
@@ -73,7 +75,7 @@ class Excel : public QTableWidget{
 
     void deleteSelected();
 
-    void somethingChanged();
+    void somethingChanged(QTableWidgetItem *item = nullptr);
 
     void findCell(const QString &keyword, Qt::CaseSensitivity cs = Qt::CaseInsensitive);
 
