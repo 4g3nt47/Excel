@@ -1,8 +1,7 @@
 #include "excel.h"
 
-Excel::Excel(quint16 rowCount, quint16 colCount, QStringList *colLabels, QList<int> *readOnlyCols, QWidget *parent) : QTableWidget(parent), ROW_COUNT(rowCount), COL_COUNT(colCount){
+Excel::Excel(quint16 rowCount, quint16 colCount, QStringList *colLabels, QWidget *parent) : QTableWidget(parent), ROW_COUNT(rowCount), COL_COUNT(colCount){
   this->colLabels = colLabels;
-  this->readOnlyCols = readOnlyCols;
 }
 
 Excel::~Excel(){
@@ -187,14 +186,6 @@ void Excel::deleteSelected(){
 }
 
 void Excel::somethingChanged(QTableWidgetItem *item){
-
-  if (item && readOnlyCols && readOnlyCols->contains(item->column())){
-    if (item->flags() & Qt::ItemIsEditable){
-      disconnect(this, &Excel::itemChanged, this, &Excel::somethingChanged); // Brief disconnect to avoid double-call
-      item->setFlags(item->flags() ^ Qt::ItemIsEditable);
-      connect(this, &Excel::itemChanged, this, &Excel::somethingChanged);
-    }
-  }
   setDocumentModified(true);
 }
 

@@ -28,7 +28,7 @@ class Excel : public QTableWidget{
 
   public:
 
-    Excel(quint16 rowCount, quint16 colCount, QStringList *colLabels = nullptr, QList<int> *readOnlyCols = nullptr, QWidget *parent = nullptr);
+    Excel(quint16 rowCount, quint16 colCount, QStringList *colLabels = nullptr, QWidget *parent = nullptr);
 
     ~Excel();
 
@@ -46,7 +46,6 @@ class Excel : public QTableWidget{
     const quint16 ROW_COUNT;
     const quint16 COL_COUNT;
     QStringList *colLabels;
-    QList<int> *readOnlyCols;
 
     QString currentFile;
 
